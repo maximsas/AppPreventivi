@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-mMzxeqEMILsTAXYmGPzJtqs6Tn8mtgcdZNC0EVTfOHU=' 'sha256-W1eZ5vjGgGYyB6xbQu4U7tKkBvp69I9QwVTwwLFWaUY=' 'sha256-/qvfMJdw7SS7oxpUZ4Ns3Iz2OccFryfVK1hbBBu4Uns=' 'sha256-7sLZIVCKJI+p2o722WwvR2TxBPgbN4XUT+iffMvdKN0=' 'sha256-1bO7yFRrCJHAG33eYGpg5EUEONX1XvcNQqGv+lFGCUk='; style-src 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://photon.komoot.io; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-mMzxeqEMILsTAXYmGPzJtqs6Tn8mtgcdZNC0EVTfOHU=' 'sha256-W1eZ5vjGgGYyB6xbQu4U7tKkBvp69I9QwVTwwLFWaUY=' 'sha256-/qvfMJdw7SS7oxpUZ4Ns3Iz2OccFryfVK1hbBBu4Uns=' 'sha256-ATq0vh33b4QSqMoSr2aUbOgXEYVnBweyu2yNBGeVGJc=' 'sha256-1bO7yFRrCJHAG33eYGpg5EUEONX1XvcNQqGv+lFGCUk='; style-src 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://photon.komoot.io; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Preventivi Radicare</title>
 <link rel="manifest" href="manifest.webmanifest">
@@ -545,7 +545,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 <script>
 const $=id=>document.getElementById(id);
 const P=x=>{const n=parseFloat(String(x).replace(",","."));return isFinite(n)&&n>0?n:0};
-const eur=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"}).format(n).replace(/\u00a0/g," ");
+const eur=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",useGrouping:"always"}).format(n).replace(/\u00a0/g," ");
 const iso=d=>{const z=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())};
 const it=s=>s?s.split("-").reverse().join("/"):"";
 const num=n=>Number(n).toLocaleString("it-IT");
@@ -664,10 +664,12 @@ const LAYOUTS=[
 {name:"Minimal",desc:"Grigio e bianco, molto spazio, caratteri classici",ac:[70,70,70],tint:[243,243,243],hd:"left",sec:"line",rows:"lines",tot:"line",hf:"times",title:"Preventivo"},
 {name:"Terra",desc:"Toni caldi, bordo laterale e schede",ac:[168,92,40],tint:[250,238,226],hd:"left",sec:"box",rows:"cards",tot:"fill",hf:"helvetica",stripe:1,boxfill:1},
 {name:"Elegante",desc:"Antracite e oro, intestazione centrata",ac:[160,125,55],dark:[38,42,52],tint:[248,243,231],hd:"center",sec:"line",rows:"lines",tot:"outline",hf:"times"},
-{name:"Colonna",desc:"Colonna laterale con i tuoi dati",ac:[20,110,120],tint:[225,242,244],hd:"side",sec:"bar",rows:"lines",tot:"fill",hf:"helvetica",boxfill:1}
+{name:"Colonna",desc:"Colonna laterale con i tuoi dati",ac:[20,110,120],tint:[225,242,244],hd:"side",sec:"bar",rows:"lines",tot:"fill",hf:"helvetica",boxfill:1},
+{name:"Schede",desc:"Come il riepilogo costi: schede numerate, totale in fondo",ac:[31,122,100],tint:[234,241,237],hd:"left",sec:"text",rows:"cards",tot:"fill",hf:"helvetica",kind:"schede"}
 ];
 function makePdf(d){
  const PX=d.demo?DEMO_PR:PR,T=LAYOUTS[d.lay]||LAYOUTS[0],p=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),W=210,H=297;
+ if(T.kind==="schede")return makeCards(d,PX);
  const AC=T.ac,TI=T.tint,DK=T.dark||[35,35,35],MU=[110,110,110],GR=[70,70,70],hf=T.hf,side=T.hd==="side",SB=62;
  const X0=side?SB+9:(T.stripe?24:18),X1=W-18,CW=X1-X0,TOP=side?20:18;let y=TOP;
  const F=(f,st,sz,col)=>{p.setFont(f,st);p.setFontSize(sz);p.setTextColor(...col)};
@@ -738,6 +740,44 @@ function makePdf(d){
  CL.forEach((c,i)=>{F(hf,"bold",9.5,AC);need(6);p.text((i+1)+".",X0,y+3.3);para(c,9.5,X0+6,CW-6);y+=1.5});
  return p.output("blob");
 }
+function makeCards(d,PX){const p=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),M=16,W=210,H=297,CW=W-2*M,X1=W-M,GRN=[31,122,100],INK=[23,44,37],MUT=[105,118,111],TX=[61,74,68],LN=[222,229,225],TI=[234,241,237],LT=[212,239,229],WH=[255,255,255];let y=0;
+ const F=(st,sz,c)=>{p.setFont("helvetica",st);p.setFontSize(sz);p.setTextColor(...c)};
+ const need=h=>{if(y+h>H-22){p.addPage();y=M}};
+ const H2=t=>{need(16);y+=7;F("bold",11,GRN);p.text(t,M,y+3.5);y+=7};
+ const para=(t,sz,c,st,x,w)=>{x=x||M;w=w||CW;F(st||"normal",sz,c);const lh=sz*.3528*1.45;p.splitTextToSize(t,w).forEach(l=>{need(lh);p.text(l,x,y+sz*.3528);y+=lh})};
+ const dm0=d.demo?"gg/mm/aaaa":"",amt=d.demo?"•••• €":eur0(d.costo);p.setLineHeightFactor(1.3);
+ // ---- intestazione
+ y=M+2;F("bold",19,GRN);p.text(PX.nome||"",M,y+5);F("normal",10,MUT);p.text(PX.ruolo||"",M,y+10.5);
+ p.setFillColor(...GRN);p.roundedRect(X1-31,y,31,7,1.3,1.3,"F");F("bold",9,WH);p.text("PREVENTIVO",X1-15.5,y+4.8,{align:"center"});
+ const rr=(l,v,yy)=>{F("bold",9.5,INK);const w=p.getTextWidth(v);p.text(v,X1,yy,{align:"right"});F("normal",9.5,MUT);p.text(l,X1-w-1.5,yy,{align:"right"})};
+ rr("Data",dm0||it(d.data),y+12.5);rr("Valido fino al",dm0||it(d.valido),y+17.3);
+ y+=21;p.setDrawColor(...GRN);p.setLineWidth(.6);p.line(M,y,X1,y);y+=1;
+ // ---- cliente
+ if(d.cliente||d.luogo){H2("Cliente");if(d.cliente)para(d.cliente,13,INK,"bold");if(d.luogo)para("Luogo dell’intervento: "+d.luogo,10,MUT)}
+ // ---- lavori: una scheda numerata per voce
+ H2(d.titolo||"Lavori");
+ d.voci.forEach((v,k)=>{const a=d.single?"":(v.n?v.n+" × ":"")+v.p,tw=CW-20;F("bold",10.5,INK);const aa=a?p.splitTextToSize(a,tw):[];F("normal",10,MUT);const bb=v.i?p.splitTextToSize(v.i,tw):[];
+  const h=7+aa.length*4.8+bb.length*4.6;need(h+2.5);p.setFillColor(...TI);p.roundedRect(M,y,CW,h,2,2,"F");
+  p.setFillColor(...GRN);p.circle(M+7.5,y+h/2,3.3,"F");F("bold",9,WH);p.text(String(k+1),M+7.5,y+h/2+1.15,{align:"center"});
+  let ty=y+3.5+3.4;if(aa.length){F("bold",10.5,INK);p.text(aa,M+15,ty);ty+=aa.length*4.8}if(bb.length){F("normal",10,a?MUT:INK);p.text(bb,M+15,ty)}y+=h+2.5});
+ // ---- dettagli operativi: tre riquadri uguali
+ H2("Dettagli operativi");need(16);const bw=(CW-8)/3;
+ [["GIORNI",d.demo||!d.giorni?"–":num(d.giorni)],["OPERATORI",d.demo||!d.operatori?"–":num(d.operatori)],["SMALTIMENTO",d.sm||"–"]].forEach((b,i)=>{const x=M+i*(bw+4);p.setDrawColor(...LN);p.setLineWidth(.3);p.roundedRect(x,y,bw,15,2,2,"S");F("bold",7.8,MUT);p.text(b[0],x+4,y+5.4);F("bold",14,INK);p.text(String(b[1]),x+4,y+12)});y+=15;
+ if(d.matd){y+=3;para("Materiali e mezzi inclusi: "+d.matd.replace(/\s*\n+\s*/g,", "),9.5,TX)}
+ // ---- totale
+ need(26);y+=7;p.setFillColor(...GRN);p.roundedRect(M,y,CW,18,2.5,2.5,"F");F("bold",9,LT);p.text("COSTO TOTALE"+(d.iva>0?" · IVA INCLUSA":""),M+5,y+(d.bollo>0?7.8:10.4));
+ if(d.bollo>0){F("normal",8.5,LT);p.text("marca da bollo da "+eur0(d.bollo)+" inclusa",M+5,y+12.6)}F("bold",22,WH);p.text(amt,X1-5,y+12.3,{align:"right"});y+=18;
+ // ---- come pagare e validità
+ const pw=(CW-5)/2,vd=P(d.vd)||30,bx=[["COME PAGARE",PX.iban?["Bonifico su IBAN "+PX.iban,"intestato a "+(PX.nome||"")]:["Da concordare"]],["VALIDITÀ",["Il preventivo vale "+vd+(vd===1?" giorno,":" giorni,"),"fino al "+(dm0||it(d.valido))]]];
+ F("normal",9,TX);const bl=bx.map(b=>b[1].flatMap(l=>p.splitTextToSize(l,pw-8))),bh=8.5+Math.max(...bl.map(l=>l.length))*4.2;need(bh+5);y+=4;
+ bx.forEach((b,i)=>{const x=M+i*(pw+5);p.setFillColor(246,248,247);p.roundedRect(x,y,pw,bh,2,2,"F");F("bold",7.8,MUT);p.text(b[0],x+4,y+5.2);F("normal",9,TX);bl[i].forEach((l,j)=>p.text(l,x+4,y+9.8+j*4.2))});y+=bh;
+ // ---- note e prescrizioni
+ if(d.note){H2("Note");para(d.note,10,INK)}
+ H2("Prescrizioni conclusive");CL.forEach((c,i)=>{need(6);F("bold",9,GRN);p.text((i+1)+".",M,y+3.2);para(c,9,TX,"normal",M+5,CW-5);y+=1.5});
+ // ---- piè di pagina con i dati fiscali
+ const np=p.getNumberOfPages(),fl=[PX.indirizzo,[PX.cf&&"Cod. Fisc. "+PX.cf,PX.piva&&"P.IVA "+PX.piva].filter(Boolean).join(" · ")].filter(Boolean),fr=[[PX.tel&&"Cell. "+PX.tel,PX.email].filter(Boolean).join(" · ")].filter(Boolean);
+ for(let i=1;i<=np;i++){p.setPage(i);p.setDrawColor(...LN);p.setLineWidth(.25);p.line(0,H-17,W,H-17);F("normal",8,MUT);fl.forEach((l,j)=>p.text(l,M,H-11.3+j*3.8));fr.forEach((l,j)=>p.text(l,X1,H-11.3+j*3.8,{align:"right"}));if(np>1)p.text("Pagina "+i+" di "+np,X1,H-11.3+3.8,{align:"right"})}
+ return p.output("blob")}
 function makeSum(d){const p=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),M=16,W=210,H=297,CW=W-2*M,X1=W-M,GRN=[31,122,100],INK=[23,44,37],MUT=[105,118,111],LN=[222,229,225],RED=[179,38,30],ORA=[232,151,58],BLU=[58,112,176],VIO=[125,105,160],GRY=[165,172,168],x=d.x&&!d.x.err?d.x:null;let y=0;
  const F=(st,sz,c)=>{p.setFont("helvetica",st);p.setFontSize(sz);p.setTextColor(...c)};
  const need=h=>{if(y+h>H-16){p.addPage();y=M}};
@@ -774,7 +814,7 @@ function makeSum(d){const p=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),M=16
  return p.output("blob")}
 function fname(d,pre){const n=(d.nf||"").replace(/\.pdf$/i,"").replace(/[\u0000-\u001f\\\/:*?"<>|]+/g," ").replace(/\s+/g," ").replace(/^[.\s]+/,"").trim().slice(0,90);if(n)return(pre==="Preventivo"?n:pre+" - "+n)+".pdf";return pre+(d.cliente?"_"+d.cliente.replace(/[^\w]+/g,"_"):"")+"_"+d.data+".pdf"}
 
-function eur0(n){return new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0,minimumFractionDigits:0}).format(n).replace(/\u00a0/g," ")}
+function eur0(n){return new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0,minimumFractionDigits:0,useGrouping:"always"}).format(n).replace(/\u00a0/g," ")}
 
 function sugg(b,g,r){g.innerHTML="";const m=b.value.match(/^([\s\S]*[,;\n])?([^,;\n]*)$/);const pre=(m&&m[1]||"").replace(/[ \t]+$/,""),cur=(m&&m[2]||"").trim().toLowerCase();if(cur.length<2)return;const all=lst([...IA,...IG,...CI]).filter(t=>t.toLowerCase()!==cur);const a=all.filter(t=>t.toLowerCase().startsWith(cur)),o=all.filter(t=>!t.toLowerCase().startsWith(cur)&&t.toLowerCase().includes(cur));[...a,...o].slice(0,5).forEach(t=>{const x=document.createElement("button");x.type="button";x.textContent=t;x.onclick=()=>{const sep=pre&&!pre.endsWith("\n")?" ":"";b.value=pre+sep+(pre?t[0].toLowerCase()+t.slice(1):t);r.i=b.value;g.innerHTML="";b.focus();sv()};g.append(x)})}
 
